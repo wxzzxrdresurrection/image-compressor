@@ -1,20 +1,6 @@
 const { contextBridge, ipcRenderer } = require('electron')
-const path = require('node:path')
 
-contextBridge.exposeInMainWorld('electron', {
-  startDrag: (fileName) => {
-    ipcRenderer.send('ondragstart', path.join(process.cwd(), fileName))
-  }
-})
-
-
-window.addEventListener('DOMContentLoaded', () => {
-    const replaceText = (selector, text) => {
-      const element = document.getElementById(selector)
-      if (element) element.innerText = text
-    }
-  
-    for (const dependency of ['chrome', 'node', 'electron']) {
-      replaceText(`${dependency}-version`, process.versions[dependency])
-    }
+contextBridge.exposeInMainWorld('api', {
+  saveFile: (defaultName, data) => ipcRenderer.invoke('save-file', { defaultName, data }),
+  showInFolder: (filePath) => ipcRenderer.invoke('show-in-folder', filePath)
 })

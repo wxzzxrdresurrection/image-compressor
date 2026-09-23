@@ -1,32 +1,100 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
   <head>
     <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy"
+          content="default-src 'self'; img-src 'self' blob: data:; worker-src 'self'; style-src 'self'; script-src 'self'">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="css/main.css">
     <title>Compresor de imágenes</title>
   </head>
   <body>
-    <div class="sidenav">
-      <h3>Mis imágenes</h3>
-      <div id="preview">
-        
-      </div> 
-    </div>
-    <div class="main">
-        <progress id="progress-bar" value="0" max="100"></progress>
-        <div class="drop-area">
-            <h2>Arrastra y suelta imágenes</h2>
-            <span>o</span>
-            <button>Selecciona tus archivos</button>
-            <input type="file" name="" id="input-file" hidden multiple>
+    <header class="topbar">
+      <div class="brand">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm3 12h10l-3.2-4.3-2.5 3.2-1.8-2.2zM9 10.5A1.5 1.5 0 1 0 9 7.5a1.5 1.5 0 0 0 0 3"/></svg>
+        <span>Compresor de imágenes</span>
+      </div>
+      <span class="topbar-hint">Todo se procesa localmente</span>
+    </header>
+
+    <main class="layout">
+      <section class="workspace">
+        <label class="drop-area" id="drop-area" tabindex="0">
+          <input type="file" id="input-file" accept="image/jpeg,image/png,image/webp" multiple hidden>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l5 5h-3.5v6h-3V8H7zm-8 14h2v2h12v-2h2v4H4z"/></svg>
+          <strong id="drop-text">Arrastra y suelta imágenes aquí</strong>
+          <span>o <u>haz clic para seleccionarlas</u> · JPG, PNG, WebP</span>
+        </label>
+
+        <div class="list-header" id="list-header" hidden>
+          <h2>Mis imágenes <span id="file-count" class="badge">0</span></h2>
+          <button class="btn btn-ghost btn-sm" id="clean-btn" type="button">Limpiar todo</button>
         </div>
-        <div class="compress-container">
-          <button id="compress-btn">Comprimir imagenes</button> 
-          <button id="clean-btn">Limpiar selección</button> 
+        <ul class="file-list" id="preview" aria-live="polite"></ul>
+      </section>
+
+      <aside class="panel">
+        <h2>Ajustes</h2>
+
+        <div class="field">
+          <label for="format">Formato de salida</label>
+          <select id="format">
+            <option value="original">Mantener original</option>
+            <option value="webp" selected>WebP (recomendado)</option>
+            <option value="jpeg">JPEG</option>
+          </select>
         </div>
-    </div>
+
+        <div class="field">
+          <label for="quality">Calidad <output id="quality-out">80%</output></label>
+          <input type="range" id="quality" min="30" max="100" step="5" value="80">
+        </div>
+
+        <div class="field">
+          <label for="max-size">Tamaño máximo (lado mayor)</label>
+          <select id="max-size">
+            <option value="99999">Sin cambiar</option>
+            <option value="3840">3840 px (4K)</option>
+            <option value="2560">2560 px</option>
+            <option value="1920" selected>1920 px (Full HD)</option>
+            <option value="1280">1280 px</option>
+            <option value="800">800 px</option>
+          </select>
+        </div>
+
+        <div class="summary" id="summary" hidden>
+          <div><span>Original</span><strong id="sum-original">—</strong></div>
+          <div><span>Comprimido</span><strong id="sum-compressed">—</strong></div>
+          <div class="summary-saved"><span>Ahorro</span><strong id="sum-saved">—</strong></div>
+        </div>
+
+        <div class="progress" id="progress" hidden>
+          <div class="progress-bar" id="progress-bar"></div>
+        </div>
+
+        <div class="actions">
+          <button class="btn btn-primary" id="compress-btn" type="button" disabled>Comprimir</button>
+          <button class="btn btn-secondary" id="save-btn" type="button" disabled>Guardar</button>
+        </div>
+        <p class="status" id="status" role="status"></p>
+      </aside>
+    </main>
+
+    <template id="file-item">
+      <li class="file-item">
+        <img class="thumb" alt="" loading="lazy" decoding="async">
+        <div class="file-info">
+          <span class="file-name"></span>
+          <span class="file-meta"></span>
+        </div>
+        <span class="file-saving"></span>
+        <button class="icon-btn file-remove" type="button" aria-label="Quitar imagen" title="Quitar">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.4 5 12 10.6 17.6 5 19 6.4 13.4 12l5.6 5.6-1.4 1.4-5.6-5.6L6.4 19 5 17.6 10.6 12 5 6.4z"/></svg>
+        </button>
+      </li>
+    </template>
+
+    <script src="node_modules/jszip/dist/jszip.min.js"></script>
+    <script type="module" src="src/files.js"></script>
   </body>
-  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.1/dist/browser-image-compression.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
-  <script type="module" src="src/files.js"></script>
 </html>
